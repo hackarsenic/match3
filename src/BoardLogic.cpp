@@ -1,5 +1,5 @@
 #include "BoardLogic.hpp"
-#include "Gem.hpp""
+#include "Gem.hpp"
 
 
 BoardLogic::BoardLogic(int columns, int rows) :
