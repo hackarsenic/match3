@@ -1,8 +1,9 @@
 #pragma once
 
+#include <memory>
 #include <cstdint>
 #include <string>
-#include "ResourceManager.hpp"
+#include "ResourceManager.h"
 #include "SFML/Graphics.hpp"
 #include <unordered_map>
 
@@ -15,29 +16,32 @@ public:
 	// gem colors
 	enum class Color { Red, Green, Blue, Violet, Orange, COUNT = 5, Bomb_V, Bomb_H, Bomb};
 	// gem states
-	enum class State { Normal, Selected };
+	enum class State { Normal, Selected, Animated, Removed };
 
-	Gem(Color color);
-	virtual ~Gem();
+    explicit Gem(Color color);
+	~Gem();
 
 	// applies gem sprite according to color
 	void ApplySprite();
 
 	// change gem state
-	void SetState(State newState);
+	void SetState(const State &newState);
+
 	// get gem state
-	const State& GetState();
+	const State &GetState() const;
 
 	// get gem sprite
-	sf::Sprite* GetSprite() const { return _Sprite; }
+    const std::unique_ptr<sf::Sprite>& GetSprite() const { return g_sprite; }
 
 private:
+	Color g_color;
+	State g_state;
+	float g_scaleX;
+	float g_scaleY;
 
-	Color _Color;
-	State _State;
+//	sf::Sprite* _Sprite;
+	std::unique_ptr<sf::Sprite> g_sprite;
 
-	sf::Sprite* _Sprite;
-	
 	// map containing color and sprite
-	std::unordered_map <Gem::Color, sf::Sprite*> _ColorSpriteMap;
+	std::unordered_map <Gem::Color, std::unique_ptr<sf::Sprite>> g_colorSpriteMap;
 };

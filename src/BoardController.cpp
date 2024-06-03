@@ -5,14 +5,15 @@
 #include "BoardController.hpp"
 #include "Gem.hpp"
 
-BoardController::BoardController() :
+BoardController::BoardController(int board_col_size, int board_row_size, int cell_size) :
+//    _cellSize(cell_size),
 	_BoardState(BoardState::Default),
-	_BoardLogic(new BoardLogic(7,10)),
-	_DrawBoard(new DrawBoard(7,10))
+	_BoardLogic(new BoardLogic(board_col_size, board_row_size)),
+    _DrawBoard(new DrawBoard(board_col_size, board_row_size, cell_size))
 {
-	// set view properties
-	_DrawBoard->SetPosition(0, 0);
-	
+    // set view properties
+    _DrawBoard->SetPosition(cell_size, cell_size*2);
+
 	// register callbacks
 	_DrawBoard->GemsSelectedHandler([this](int sourceX, int sourceY, int targetX, int targetY) 
 									{ return OnGemSelect(sourceX, sourceY, targetX, targetY); });
@@ -22,7 +23,7 @@ BoardController::BoardController() :
 	_BoardLogic->ColorSpawnedHandler([this](int column, int row) { return OnColorSpawn(column, row); });
 	_BoardLogic->BombAddedHandler([this](int column, int row) { return OnBombSpawn(column, row); });
 	
-	// generate the board
+	// generate the board gems
 	_BoardLogic->Generate();
 
 	// board dimensions
@@ -51,33 +52,33 @@ void BoardController::Update()
 {
 	// after every update check if gems were swapped.
 	// If gems were swapped check if patterns were removed
-	
-	switch (_BoardState)
-	{
-	case BoardState::GemsSelectState:
-		// try to swap selected gems
-		TrySwapGems();
-		break;
-	case BoardState::GemsSwapState:
-		// find pattern
-		FindPattern();
-		break;
-	case BoardState::PatternDetectState:
-		// remove all patterns
-		RemovePattern();
-		break;
-	case BoardState::PatternsRemovedState:
-		// spawn gems one row at a time until no empty cells left
-		SpawnGems();
-		break;
-	case BoardState::GemsSpawnState:
-		// find pattern
-		FindPattern();
-		break;
-	default:
-		break;
+	if (!_DrawBoard->GetAnimationState()) {
+        switch (_BoardState)
+        {
+            case BoardState::GemsSelectState:
+                // try to swap selected gems
+                TrySwapGems();
+                break;
+            case BoardState::GemsSwapState:
+                // find pattern
+                FindPattern();
+                break;
+            case BoardState::PatternDetectState:
+                // remove all patterns
+                RemovePattern();
+                break;
+            case BoardState::PatternsRemovedState:
+                // spawn gems one row at a time until no empty cells left
+                SpawnGems();
+                break;
+            case BoardState::GemsSpawnState:
+                // find pattern
+                FindPattern();
+                break;
+            default:
+                break;
+        }
 	}
-	
 }
 
 void BoardController::OnGemSelect(int source_x, int source_y, int target_x, int target_y)
@@ -108,8 +109,8 @@ void BoardController::TrySwapGems()
 	bool is_swap_valid = _BoardLogic->SwapGemColors(_SourceCellX, _SourceCellY, _TargetCellX, _TargetCellY);
 
 	// get gems pending to swap
-	Gem* first_gem = _DrawBoard->GetGem(_SourceCellX, _SourceCellY);
-	Gem* second_gem = _DrawBoard->GetGem(_TargetCellX, _TargetCellY);
+	Gem *first_gem = _DrawBoard->GetGem(_SourceCellX, _SourceCellY);
+	Gem *second_gem = _DrawBoard->GetGem(_TargetCellX, _TargetCellY);
 
 	if (is_swap_valid)
 	{
@@ -128,7 +129,7 @@ void BoardController::FindPattern()
 	_BoardLogic->DetectGemColorPatterns();
 	_BoardLogic->DetectGemSquareColorPatterns();
 
-	if (_BoardLogic->HasPatterns() == true)
+	if (_BoardLogic->HasPatterns())
 		_BoardState = BoardState::PatternDetectState;
 }
 

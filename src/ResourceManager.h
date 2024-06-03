@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include <Map>
+#include <map>
 
 //Singlton resource manager class
 class ResourceManager

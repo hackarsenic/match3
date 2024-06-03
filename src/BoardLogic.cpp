@@ -13,8 +13,6 @@ BoardLogic::BoardLogic(int columns, int rows) :
 
 	//seed with time
 	_RandomNumberGenerator.seed(time(NULL));
-
-
 }
 
 BoardLogic::~BoardLogic()
@@ -61,7 +59,6 @@ bool BoardLogic::DetonateBomb(int cell_x, int cell_y)
 			return (row >= 0) && (row < _Rows) &&
 				(col >= 0) && (col < _Columns);
 		};
-
 
 		// checks for edge cases
 		if (is_valid(cell_y - 1, cell_x - 1))
@@ -153,12 +150,13 @@ bool BoardLogic::DetonateBomb(int cell_x, int cell_y)
 		}
 		return true;
 	}
+
 	return false;
 }
 
 int BoardLogic::GetRandomColor()
 {
-	return uint_dist(_RandomNumberGenerator) % (int)Gem::Color::COUNT;
+	return uint_dist(_RandomNumberGenerator) % static_cast<int>(Gem::Color::COUNT);
 }
 
 void BoardLogic::Generate()

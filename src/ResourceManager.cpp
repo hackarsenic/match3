@@ -1,4 +1,4 @@
-#include "ResourceManager.hpp"
+#include "ResourceManager.h"
 
 ResourceManager& ResourceManager::get_instance()
 {

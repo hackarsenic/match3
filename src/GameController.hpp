@@ -19,26 +19,27 @@ enum GameStatus {
 
 class GameController {
 public:
+    GameController() = default;
 
-	/*! \brief Executes the application
-	*
-	*	\return Returns 0 if everything is ok and 1 if there was an error
-	*/
+    // Execute the app
+    // return 0 if exits normal
 	int Execute();
 
 private:
 
-	/*! \brief Executes the application
-	*
-	*/
 	bool Initialize();
+	void InitWindowSize();
 
 	// free all resources
 	void CleanUp();
 
 	// inital window dimensions
-	static const uint32_t m_WindowWidth = 755;
-	static const uint32_t m_WindowHeight = 600;
+	uint32_t m_WindowWidth;
+	uint32_t m_WindowHeight;
+    const uint32_t m_CellSize = 110;
+	uint32_t m_RowSize;
+	uint32_t m_ColSize;
+
 
 	//input
 	//InputManager* m_InputMgr = nullptr;

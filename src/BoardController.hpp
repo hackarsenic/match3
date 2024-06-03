@@ -10,7 +10,7 @@ class DrawBoard;
 class BoardController
 {
 public:
-	BoardController();
+	BoardController(int board_col_size, int board_row_size, int cell_size);
 	~BoardController();
 
 	enum class BoardState { Default, GemsSwapState, GemsSelectState, PatternDetectState, PatternsRemovedState, GemsSpawnState };
@@ -52,14 +52,18 @@ private:
 
 	// callback function for bomb detonate
 	bool OnBombSelect(int column, int row);
-	
-	BoardState _BoardState;
-	BoardLogic* _BoardLogic;
-	DrawBoard* _DrawBoard;
+
 
 	// store selected gems
 	int _SourceCellX;
 	int _SourceCellY;
 	int _TargetCellX;
 	int _TargetCellY;
+
+//	// tile cell sizes
+//	const int _cellSize;
+
+    BoardState _BoardState;
+    BoardLogic* _BoardLogic;
+    DrawBoard* _DrawBoard;
 };
