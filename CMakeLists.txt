@@ -1,12 +1,14 @@
 cmake_minimum_required(VERSION 3.6)
 
-set(CMAKE_PREFIX_PATH "C:/Users/User/Desktop/DevTestGame-master/SFML")
+set(CMAKE_PREFIX_PATH "${CMAKE_CURRENT_BINARY_DIR}/DevTestGame-master/SFML")
 set (PROJECT_NAME, M3Game)
 set (TARGET_NAME Match3Game)
 
 project("${TARGET_NAME}")
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
+configure_file(src/resources.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/resources.h @ONLY)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
 
 find_package(SFML 2 COMPONENTS graphics window system)
 include_directories(${SFML_INCLUDE_DIR})

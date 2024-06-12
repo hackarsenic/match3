@@ -3,19 +3,18 @@
 #include <SFML/Graphics.hpp>
 #include <map>
 
-//Singlton resource manager class
+// Singlton resource manager class
 class ResourceManager
 {
 private:
-	ResourceManager() = default;
-	std::map<std::string, sf::Texture> _textures;
-	//static ResourceManager *instance;
-	
-public:
-	static ResourceManager& get_instance();
-	static sf::Texture& GetTexture(const std::string &filename);
+    ResourceManager() = default;
+    std::map<std::string, sf::Texture> r_textures;
 
-	//prohibit copy and assign of singleton
-	ResourceManager(ResourceManager const&) = delete;
-	void operator=(ResourceManager const&) = delete;
+public:
+    static ResourceManager &GetInstance();
+    static sf::Texture &GetTexture(const std::string &filename);
+
+    // prohibit copy and assign of singleton
+    ResourceManager(ResourceManager const &) = delete;
+    void operator=(ResourceManager const &) = delete;
 };

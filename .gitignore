@@ -1,2 +1,4 @@
-build/
+/build/
 .DS_Store
+/sfml-build/CMakeCache.txt
+/sfml-build/CMakeFiles/cmake.check_cache

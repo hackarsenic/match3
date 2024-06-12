@@ -1,12 +1,10 @@
-#include <iostream>
+#include <memory>
+#include "GameController.h"
 
-#include "GameController.hpp"
-
-int main() {
-	GameController* gc = new GameController();
+int main()
+{
+    std::unique_ptr<GameController> gc = std::make_unique<GameController>();
     gc->Execute();
 
-	return 0;
-   
-
+    return 0;
 }

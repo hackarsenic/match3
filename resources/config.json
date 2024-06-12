@@ -1,0 +1,11 @@
+{
+  "col_size": 6,
+  "row_size": 7,
+  "moves count": 10,
+  "obj_num": 3,
+  "objectives" : {
+    "red": 10,
+    "green": 12,
+    "blue": 20
+  }
+}
