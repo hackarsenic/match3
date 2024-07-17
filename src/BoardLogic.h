@@ -9,7 +9,7 @@
 class BoardLogic
 {
 public:
-    BoardLogic(int columns, int rows);
+    BoardLogic();
 
     // generate random colors
     void Generate();
@@ -47,12 +47,18 @@ public:
     int GetGemColor(int column, int row) const;
     // returns amount of empty cells
     int GetEmptyCells() const;
+    // returns remaining move number
+    int GetMoveCount() const;
+    // returns current state of objectives
+    const std::map<int, int> &GetObjectives() const;
 
     // methods for registering state changes (color changes)
-    void ColorAddedHandler(std::function<void(int, int)> handlerFunction);
-    void ColorRemovedHandler(std::function<void(int, int)> handlerFunction);
-    void ColorSpawnedHandler(std::function<void(int, int)> handlerFunction);
-    void BombAddedHandler(std::function<void(int, int)> handlerFunction);
+    void ColorAddedHandler(std::function<void(int, int)> handler_function);
+    void ColorRemovedHandler(std::function<void(int, int)> handler_function);
+    void ColorSpawnedHandler(std::function<void(int, int)> handler_function);
+    void BombAddedHandler(std::function<void(int, int)> handler_function);
+    void MoveCountHandler(std::function<void()> handler_function);
+    void ObjectiveUpdateHandler(std::function<void()> handler_function);
 
 private:
     // generate a random color
@@ -61,10 +67,17 @@ private:
     // check if selected color is part of patterns
     bool IsPartOfSamePattern(int cell_x, int cell_y) const;
 
+    // check if objective found
+    void DecreaseNCheckObjectives(int gem);
+
 private:
     // board size
     int b_columns;
     int b_rows;
+
+    // win conditions
+    int b_moveCount;
+    std::map<int, int> b_objectives;
 
     // vector holding color info of all cells
     std::vector<int> b_colors;
@@ -89,4 +102,6 @@ private:
     std::function<void(int, int)> b_ColorAdded;
     std::function<void(int, int)> b_ColorRemoved;
     std::function<void(int, int)> b_BombAdded;
+    std::function<void()> b_MoveCountUpdated;
+    std::function<void()> b_ObjectivesUpdated;
 };

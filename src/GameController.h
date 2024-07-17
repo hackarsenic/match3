@@ -14,7 +14,6 @@ class GameController
 public:
     enum class GameStatus
     {
-        NotStarted,
         Started,
         Won,
         Failed
@@ -30,14 +29,8 @@ private:
     void InitWindowSize();
 
     // inital window dimensions
-    const uint32_t g_cellSize;
-    uint32_t g_windowWidth;
-    uint32_t g_windowHeight;
-    uint32_t g_rowSize;
-    uint32_t g_colSize;
-
-    // input
-    // InputManager* m_InputMgr = nullptr;
+    uint16_t g_windowWidth;
+    uint16_t g_windowHeight;
 
     // controller that handles game logic
     std::unique_ptr<BoardController> g_boardController;

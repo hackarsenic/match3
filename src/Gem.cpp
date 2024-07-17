@@ -2,49 +2,48 @@
 #include "SFML/Graphics.hpp"
 #include "resources.h"
 
-Gem::Gem(Color color) : g_color(color), g_scaleX(1), g_scaleY(1), g_state(State::Normal)
+std::unordered_map<Gem::Color, sf::Sprite> Gem::g_colorSpriteMap = {
+    {Gem::Color::Red, sf::Sprite(ResourceManager::GetTexture(std::string(PATH_TO_RECOURCES) + "red.png"))},
+    {Gem::Color::Green, sf::Sprite(ResourceManager::GetTexture(std::string(PATH_TO_RECOURCES) + "green.png"))},
+    {Gem::Color::Blue, sf::Sprite(ResourceManager::GetTexture(std::string(PATH_TO_RECOURCES) + "blue.png"))},
+    {Gem::Color::Violet, sf::Sprite(ResourceManager::GetTexture(std::string(PATH_TO_RECOURCES) + "violet.png"))},
+    {Gem::Color::Orange, sf::Sprite(ResourceManager::GetTexture(std::string(PATH_TO_RECOURCES) + "orange.png"))},
+    {Gem::Color::Bomb_V, sf::Sprite(ResourceManager::GetTexture(std::string(PATH_TO_RECOURCES) + "v_bomb.png"))},
+    {Gem::Color::Bomb_H, sf::Sprite(ResourceManager::GetTexture(std::string(PATH_TO_RECOURCES) + "h_bomb.png"))},
+    {Gem::Color::Bomb, sf::Sprite(ResourceManager::GetTexture(std::string(PATH_TO_RECOURCES) + "bomb.png"))}
+};
 
+Gem::Gem(Color color) : g_color(color), g_state(State::Normal)
 {
-    // add sprites to the map
-    g_colorSpriteMap[Gem::Color::Red] = std::make_unique<sf::Sprite>(sf::Sprite(ResourceManager::GetTexture(std::string(PATH_TO_RECOURCES) + "red.png")));
-    g_colorSpriteMap[Gem::Color::Green] = std::make_unique<sf::Sprite>(sf::Sprite(ResourceManager::GetTexture(std::string(PATH_TO_RECOURCES) + "green.png")));
-    g_colorSpriteMap[Gem::Color::Blue] = std::make_unique<sf::Sprite>(sf::Sprite(ResourceManager::GetTexture(std::string(PATH_TO_RECOURCES) + "blue.png")));
-    g_colorSpriteMap[Gem::Color::Violet] = std::make_unique<sf::Sprite>(sf::Sprite(ResourceManager::GetTexture(std::string(PATH_TO_RECOURCES) + "violet.png")));
-    g_colorSpriteMap[Gem::Color::Orange] = std::make_unique<sf::Sprite>(sf::Sprite(ResourceManager::GetTexture(std::string(PATH_TO_RECOURCES) + "orange.png")));
-    g_colorSpriteMap[Gem::Color::Bomb_V] = std::make_unique<sf::Sprite>(sf::Sprite(ResourceManager::GetTexture(std::string(PATH_TO_RECOURCES) + "v_bomb.png")));
-    g_colorSpriteMap[Gem::Color::Bomb_H] = std::make_unique<sf::Sprite>(sf::Sprite(ResourceManager::GetTexture(std::string(PATH_TO_RECOURCES) + "h_bomb.png")));
-    g_colorSpriteMap[Gem::Color::Bomb] = std::make_unique<sf::Sprite>(sf::Sprite(ResourceManager::GetTexture(std::string(PATH_TO_RECOURCES) + "bomb.png")));
+//    const auto min_sprite_height = std::min_element(g_colorSpriteMap.begin(), g_colorSpriteMap.end(), [](const auto &a, const auto &b) {
+//        return a.second.getLocalBounds().height < b.second.getLocalBounds().height;
+//    })->second.getLocalBounds().height;
+//
+//    for (auto& [color, sprite] : g_colorSpriteMap) {
+//        const auto scale = min_sprite_height / sprite.getLocalBounds().height;
+//        sprite.setScale(scale, scale);
+//    }
 }
 
 Gem::Gem(const Gem &rhs)
 {
     g_color = rhs.g_color;
     g_state = rhs.g_state;
-    g_scaleX = rhs.g_scaleX;
-    g_scaleY = rhs.g_scaleY;
 
-    g_sprite = std::make_unique<sf::Sprite>(*rhs.g_sprite);
-    for (auto it = rhs.g_colorSpriteMap.cbegin(); it == rhs.g_colorSpriteMap.cend(); ++it) {
-        g_colorSpriteMap.emplace(std::make_pair(it->first, std::make_unique<sf::Sprite>(*it->second)));
-    }
+    g_sprite = std::make_shared<sf::Sprite>(*rhs.g_sprite);
 }
 
 Gem::Gem(Gem &&rhs) noexcept
 {
     g_color = rhs.g_color;
     g_state = rhs.g_state;
-    g_scaleX = rhs.g_scaleX;
-    g_scaleY = rhs.g_scaleY;
 
     g_sprite = std::move(rhs.g_sprite);
-    for (auto it = rhs.g_colorSpriteMap.begin(); it == rhs.g_colorSpriteMap.end(); ++it) {
-        g_colorSpriteMap.emplace(std::make_pair(it->first, std::move(it->second)));
-    }
 }
 
 void Gem::ApplySprite()
 {
-    g_sprite = std::move(g_colorSpriteMap[g_color]);
+    g_sprite = std::make_shared<sf::Sprite>(g_colorSpriteMap[g_color]);
 }
 
 void Gem::SetState(const State &newState)

@@ -11,11 +11,6 @@ class Gem;
 class DrawBoard : public sf::Drawable
 {
 public:
-    friend class Animation;
-
-    DrawBoard(int columns, int rows, int cell_size = 110);
-    ~DrawBoard() override = default;
-
     enum class DrawBoardState
     {
         SelectFirstGemState,
@@ -23,11 +18,16 @@ public:
         RemoveGemsState
     };
 
+    friend class Animation;
+
+    DrawBoard(int render_window_w, int render_window_h);
+    ~DrawBoard() override = default;
+
     // position of the board
     void SetPosition(int x, int y);
 
     // gets gem of selected cell
-    std::unique_ptr<Gem> GetGem(int column, int row);
+    std::shared_ptr<Gem> GetGem(int column, int row);
 
     // check if animation playing
     bool GetAnimationState() const { return d_isAnimating; }
@@ -39,14 +39,19 @@ public:
     void MarkRemoved(int column, int row);
 
     // moves gem to target cell
-    void Move(std::unique_ptr<Gem> move_gem, int column, int row);
+    void Move(const std::shared_ptr<Gem> &move_gem, int column, int row);
+
+    // updates move number on scoreboard
+    void UpdateMoveCount(int move_count);
+
+    void UpdateObjectives(const std::map<int, int> &objectives);
 
     // method registers gem selection event
     void GemsSelectedHandler(std::function<void(int, int, int, int)> handlerFunction);
     void BombSelectedHandler(std::function<bool(int, int)> handlerFunction);
-    void ScaleAnimationHandler(std::function<void(const std::unique_ptr<Gem> &, const sf::Vector2f &)> handlerFunction);
-    void MoveHorizAnimationHandler(std::function<void(const std::unique_ptr<Gem> &, const sf::Vector2f &)> handlerFunction);
-    void MoveVertAnimationHandler(std::function<void(const std::unique_ptr<Gem> &, const sf::Vector2f &)> handlerFunction);
+    void ScaleAnimationHandler(std::function<void(const std::shared_ptr<Gem> &, const sf::Vector2f &)> handlerFunction);
+    void MoveHorizAnimationHandler(std::function<void(const std::shared_ptr<Gem> &, const sf::Vector2f &)> handlerFunction);
+    void MoveVertAnimationHandler(std::function<void(const std::shared_ptr<Gem> &, const sf::Vector2f &)> handlerFunction);
 
     // registers mouse events
     void OnMousePress(sf::Event *event);
@@ -55,15 +60,12 @@ public:
     void ClearPendingRemovalGems();
 
 private:
-    // set board width
-    constexpr void SetWidth(int width);
-
-    // set board height
-    constexpr void SetHeight(int height);
-
     // set cell size according to column, row quantity and
     // actual board width height
     constexpr void InitBoardDimensions();
+
+    // Generates objectives
+    void GenerateObjectives();
 
     // Generates score board texture
     void GenerateScoreBoardTexture() const;
@@ -71,7 +73,7 @@ private:
     // Generates game board texture
     void GenerateTileBoardTexture() const;
 
-    // Overrides draw funtion of base Drawable
+    // Overrides draw function of base Drawable
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
     // Swaps selected cells
@@ -88,23 +90,23 @@ private:
     // position and dimensions of the board
     int d_positionX;
     int d_positionY;
-    int d_width;
-    int d_height;
 
     // dimensions of the cells
     int d_cellWidth;
     int d_cellHeight;
 
-    // mouse position
-    int d_mousePositionX;
-    int d_mousePositionY;
+    // remaining player moves
+    int d_currentMoveCount;
+
+    // current objectives state
+    std::map<Gem::Color, sf::Text> d_currentObjectives;
 
     float d_gemPositioningTweakFactor;
     float d_targetGemSize;
 
     // vector that holds all gems
-    std::vector<std::unique_ptr<Gem>> d_gemArray;
-    std::vector<std::unique_ptr<Gem>> d_pendingRemovalGemArray;
+    std::vector<std::shared_ptr<Gem>> d_gemArray;
+    std::vector<std::shared_ptr<Gem>> d_pendingRemovalGemArray;
 
     // holds the current board state
     DrawBoardState d_state;
@@ -118,25 +120,30 @@ private:
     // is animation playing
     bool d_isAnimating;
 
+    // holds objective gems texture
+    std::unique_ptr<sf::RenderTexture> d_combinedObjectivesGemTexture;
+
     // holds score board background texture
     std::unique_ptr<sf::RenderTexture> d_combinedScoreTexture;
 
     // holds game board background texture
     std::unique_ptr<sf::RenderTexture> d_combinedTileTexture;
 
+    // views actual score
+    std::unique_ptr<sf::Text> d_score;
+
+    sf::Font d_scoreFont;
+
     // gameplay handler functions
     std::function<void(int, int, int, int)> d_GemsSelected;
     std::function<bool(int, int)> d_BombSelected;
 
     // animation handler functions
-    std::function<void(const std::unique_ptr<Gem> &, const sf::Vector2f &)> d_PlayScaleAnimation;
-    std::function<void(const std::unique_ptr<Gem> &, const sf::Vector2f &)> d_PlayMoveHorizAnimation;
-    std::function<void(const std::unique_ptr<Gem> &, const sf::Vector2f &)> d_PlayMoveVertAnimation;
+    std::function<void(const std::shared_ptr<Gem> &, const sf::Vector2f &)> d_PlayScaleAnimation;
+    std::function<void(const std::shared_ptr<Gem> &, const sf::Vector2f &)> d_PlayMoveHorizAnimation;
+    std::function<void(const std::shared_ptr<Gem> &, const sf::Vector2f &)> d_PlayMoveVertAnimation;
 
     // resolution of view board will be drawn on
-    static int d_ResolutionW;
-    static int d_ResolutionH;
-
-    // flag to generate score board only once
-    static bool d_scFlag;
+    int d_ResolutionW;
+    int d_ResolutionH;
 };

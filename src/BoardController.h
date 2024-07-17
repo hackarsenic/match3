@@ -14,6 +14,7 @@ public:
     {
         Default,
         GemsSwapState,
+        GemsSwapFailed,
         GemsSelectState,
         PatternDetectState,
         PatternsRemovedState,
@@ -21,10 +22,16 @@ public:
         GemsSpawnState
     };
 
-    BoardController(int board_col_size, int board_row_size, int cell_size);
+    BoardController(int render_window_w, int render_window_h);
 
     // update board state
     void Update();
+
+    // get loose condition status
+    bool GetGameOverStatus() const { return b_isGameOver; }
+
+    // get win condition status
+    bool GetWinStatus() const { return b_isWin; }
 
     // get pointer to DrawBoard
     std::shared_ptr<DrawBoard> GetDrawBoard() const { return b_drawBoard; }
@@ -32,6 +39,9 @@ public:
 private:
     // swap gems if pattern is found
     void TrySwapGems();
+
+    // return gems to previous position
+    void RevertGemSwap();
 
     // detect color pattern
     void FindPattern();
@@ -63,12 +73,21 @@ private:
     // callback function for bomb detonate
     bool OnBombSelect(int column, int row);
 
+    // callback function for move count update
+    void OnMoveUpdate();
+
+    // callback function for objectives update
+    void OnObjectiveHit();
+
 private:
     // store selected gems
     int b_sourceCellX;
     int b_sourceCellY;
     int b_targetCellX;
     int b_targetCellY;
+
+    bool b_isGameOver;
+    bool b_isWin;
 
     BoardState b_boardState;
     std::unique_ptr<BoardLogic> b_boardLogic;

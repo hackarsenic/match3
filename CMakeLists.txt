@@ -6,6 +6,21 @@ set (TARGET_NAME Match3Game)
 
 project("${TARGET_NAME}")
 
+# debug build flags (overwrite default cmake debug flags)
+set(CMAKE_C_FLAGS_DEBUG "-ggdb -fsanitize=address,undefined,leak")
+set(CMAKE_CXX_FLAGS_DEBUG "-ggdb -fsanitize=address,undefined,leak")
+set(CMAKE_EXE_LINKER_FLAGS_DEBUG "")
+
+# release build flags (overwrite default cmake release flags)
+set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
+
+# generic flags
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wshadow -Wconversion -Wpedantic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wshadow -Wconversion -Wpedantic")
+
+set(CMAKE_CXX_STANDARD 17)
+
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
 configure_file(src/resources.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/resources.h @ONLY)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)

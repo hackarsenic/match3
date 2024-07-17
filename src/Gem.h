@@ -49,16 +49,18 @@ public:
     const State &GetState() const;
 
     // get gem sprite
-    const std::unique_ptr<sf::Sprite> &GetSprite() const { return g_sprite; }
+    const std::shared_ptr<sf::Sprite> &GetSprite() const { return g_sprite; }
+
+    static const std::unordered_map<Gem::Color, sf::Sprite> &GetGemSpriteMap() { return g_colorSpriteMap; }
+//    static const std::unordered_map<Gem::Color, std::shared_ptr<sf::Sprite>> &GetGemSpriteMap() { return g_colorSpriteMap; }
 
 private:
     Color g_color;
     State g_state;
-    float g_scaleX;
-    float g_scaleY;
 
-    std::unique_ptr<sf::Sprite> g_sprite;
+    std::shared_ptr<sf::Sprite> g_sprite;
 
     // map containing color and sprite
-    std::unordered_map<Gem::Color, std::unique_ptr<sf::Sprite>> g_colorSpriteMap;
+    static std::unordered_map<Gem::Color, sf::Sprite> g_colorSpriteMap;
+//    static std::unordered_map<Gem::Color, std::shared_ptr<sf::Sprite>> g_colorSpriteMap;
 };

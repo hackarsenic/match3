@@ -1,7 +1,13 @@
+#include "GameConfig.h"
 #include "BoardLogic.h"
 #include "Gem.h"
 
-BoardLogic::BoardLogic(int columns, int rows) : b_columns(columns), b_rows(rows), b_emptyCellsNum(0)
+BoardLogic::BoardLogic()
+    : b_columns(GameConfig::GetInstance().GetColSize()),
+      b_rows(GameConfig::GetInstance().GetRowSize()),
+      b_moveCount(GameConfig::GetInstance().GetMoveCount()),
+      b_objectives(GameConfig::GetInstance().GetObjectives()),
+      b_emptyCellsNum(0)
 {
     // resize vectors according to board size
     b_colors.resize(b_columns * b_rows, -1);
@@ -9,16 +15,21 @@ BoardLogic::BoardLogic(int columns, int rows) : b_columns(columns), b_rows(rows)
 
     // seed with time
     b_randomNumberGenerator.seed(time(nullptr));
+
+    // get the objectives
+    for (const auto &p : GameConfig::GetInstance().GetObjectives()) {
+        b_objectives.insert({p.first, p.second});
+    }
 }
 
 bool BoardLogic::SwapGemColors(int source_x, int source_y, int target_x, int target_y)
 {
-    int source_position = source_y * b_columns + source_x;
-    int target_position = target_y * b_columns + target_x;
+    const int source_position = source_y * b_columns + source_x;
+    const int target_position = target_y * b_columns + target_x;
 
     // try to swap colors - check for pattern
-    int source_color = b_colors[source_y * b_columns + source_x];
-    int target_color = b_colors[target_y * b_columns + target_x];
+    const int source_color = b_colors[source_y * b_columns + source_x];
+    const int target_color = b_colors[target_y * b_columns + target_x];
 
     // swap
     b_colors[source_position] = target_color;
@@ -26,6 +37,8 @@ bool BoardLogic::SwapGemColors(int source_x, int source_y, int target_x, int tar
 
     // check if any of selected colors is now part of a pattern
     if (IsPartOfSamePattern(source_x, source_y) || IsPartOfSamePattern(target_x, target_y)) {
+        --b_moveCount;
+        b_MoveCountUpdated();
         return true;
     } else {
         // reverse swap
@@ -40,82 +53,180 @@ bool BoardLogic::DetonateBomb(int cell_x, int cell_y)
 {
     // Square bomb detonation case
     if (b_colors[cell_y * b_columns + cell_x] == 8) {
-        auto is_valid = [this](int row, int col) -> bool { return (row >= 0) && (row < b_rows) && (col >= 0) && (col < b_columns); };
+        if (b_colors[cell_y * b_columns + cell_x] != -1)
+            b_ColorRemoved(cell_x, cell_y);
+        b_colors[cell_y * b_columns + cell_x] = -1;
+        ++b_emptyCellsNum;
+
+        const auto is_valid = [this](int row, int col) -> bool { return (row >= 0) && (row < b_rows) && (col >= 0) && (col < b_columns); };
 
         // checks for edge cases
         if (is_valid(cell_y - 1, cell_x - 1)) {
-            b_colors[(cell_y - 1) * b_columns + cell_x - 1] = -1;
-            b_ColorRemoved(cell_x - 1, cell_y - 1);
-            ++b_emptyCellsNum;
+            const size_t gem_idx = (cell_y - 1) * b_columns + cell_x - 1;
+            DecreaseNCheckObjectives(b_colors[gem_idx]);
+            if (b_colors[gem_idx] > 5 && b_colors[gem_idx] < 9) {
+                ++b_moveCount;
+                DetonateBomb(cell_x - 1, cell_y - 1);
+            }
+            if (b_colors[gem_idx] != -1) {
+                b_ColorRemoved(cell_x - 1, cell_y - 1);
+                b_colors[gem_idx] = -1;
+                ++b_emptyCellsNum;
+            }
         }
 
         if (is_valid(cell_y - 1, cell_x)) {
-            b_colors[(cell_y - 1) * b_columns + cell_x] = -1;
-            b_ColorRemoved(cell_x, cell_y - 1);
-            ++b_emptyCellsNum;
+            const size_t gem_idx = (cell_y - 1) * b_columns + cell_x;
+            DecreaseNCheckObjectives(b_colors[gem_idx]);
+            if (b_colors[gem_idx] > 5 && b_colors[gem_idx] < 9) {
+                ++b_moveCount;
+                DetonateBomb(cell_x, cell_y - 1);
+            }
+            if (b_colors[gem_idx] != -1) {
+                b_ColorRemoved(cell_x, cell_y - 1);
+                b_colors[gem_idx] = -1;
+                ++b_emptyCellsNum;
+            }
         }
 
         if (is_valid(cell_y - 1, cell_x + 1)) {
-            b_colors[(cell_y - 1) * b_columns + cell_x + 1] = -1;
-            b_ColorRemoved(cell_x + 1, cell_y - 1);
-            ++b_emptyCellsNum;
+            const size_t gem_idx = (cell_y - 1) * b_columns + cell_x + 1;
+            DecreaseNCheckObjectives(b_colors[gem_idx]);
+            if (b_colors[gem_idx] > 5 && b_colors[gem_idx] < 9) {
+                ++b_moveCount;
+                DetonateBomb(cell_x + 1, cell_y - 1);
+            }
+            if (b_colors[gem_idx] != -1) {
+                b_ColorRemoved(cell_x + 1, cell_y - 1);
+                b_colors[gem_idx] = -1;
+                ++b_emptyCellsNum;
+            }
         }
 
         if (is_valid(cell_y, cell_x - 1)) {
-            b_colors[cell_y * b_columns + cell_x - 1] = -1;
-            b_ColorRemoved(cell_x - 1, cell_y);
-            ++b_emptyCellsNum;
-        }
-
-        if (is_valid(cell_y, cell_x)) {
-            b_colors[cell_y * b_columns + cell_x] = -1;
-            b_ColorRemoved(cell_x, cell_y);
-            ++b_emptyCellsNum;
+            const size_t gem_idx = cell_y * b_columns + cell_x - 1;
+            DecreaseNCheckObjectives(b_colors[gem_idx]);
+            if (b_colors[gem_idx] > 5 && b_colors[gem_idx] < 9) {
+                ++b_moveCount;
+                DetonateBomb(cell_x - 1, cell_y);
+            }
+            if (b_colors[gem_idx] != -1) {
+                b_ColorRemoved(cell_x - 1, cell_y);
+                b_colors[gem_idx] = -1;
+                ++b_emptyCellsNum;
+            }
         }
 
         if (is_valid(cell_y, cell_x + 1)) {
-            b_colors[cell_y * b_columns + cell_x + 1] = -1;
-            b_ColorRemoved(cell_x + 1, cell_y);
-            ++b_emptyCellsNum;
+            const size_t gem_idx = cell_y * b_columns + cell_x + 1;
+            DecreaseNCheckObjectives(b_colors[gem_idx]);
+            if (b_colors[gem_idx] > 5 && b_colors[gem_idx] < 9) {
+                ++b_moveCount;
+                DetonateBomb(cell_x + 1, cell_y);
+            }
+            if (b_colors[gem_idx] != -1) {
+                b_ColorRemoved(cell_x + 1, cell_y);
+                b_colors[gem_idx] = -1;
+                ++b_emptyCellsNum;
+            }
         }
 
         if (is_valid(cell_y + 1, cell_x - 1)) {
-            b_colors[(cell_y + 1) * b_columns + cell_x - 1] = -1;
-            b_ColorRemoved(cell_x - 1, cell_y + 1);
-            ++b_emptyCellsNum;
+            const size_t gem_idx = (cell_y + 1) * b_columns + cell_x - 1;
+            DecreaseNCheckObjectives(b_colors[gem_idx]);
+            if (b_colors[gem_idx] > 5 && b_colors[gem_idx] < 9) {
+                ++b_moveCount;
+                DetonateBomb(cell_x - 1, cell_y + 1);
+            }
+            if (b_colors[gem_idx] != -1) {
+                b_ColorRemoved(cell_x - 1, cell_y + 1);
+                b_colors[gem_idx] = -1;
+                ++b_emptyCellsNum;
+            }
         }
 
         if (is_valid(cell_y + 1, cell_x)) {
-            b_colors[(cell_y + 1) * b_columns + cell_x] = -1;
-            b_ColorRemoved(cell_x, cell_y + 1);
-            ++b_emptyCellsNum;
+            const size_t gem_idx = (cell_y + 1) * b_columns + cell_x;
+            DecreaseNCheckObjectives(b_colors[gem_idx]);
+            if (b_colors[gem_idx] > 5 && b_colors[gem_idx] < 9) {
+                ++b_moveCount;
+                DetonateBomb(cell_x, cell_y + 1);
+            }
+            if (b_colors[gem_idx] != -1) {
+                b_ColorRemoved(cell_x, cell_y + 1);
+                b_colors[gem_idx] = -1;
+                ++b_emptyCellsNum;
+            }
         }
 
         if (is_valid(cell_y + 1, cell_x + 1)) {
-            b_colors[(cell_y + 1) * b_columns + cell_x + 1] = -1;
-            b_ColorRemoved(cell_x + 1, cell_y + 1);
-            ++b_emptyCellsNum;
+            const size_t gem_idx = (cell_y + 1) * b_columns + cell_x + 1;
+            DecreaseNCheckObjectives(b_colors[gem_idx]);
+            if (b_colors[gem_idx] > 5 && b_colors[gem_idx] < 9) {
+                ++b_moveCount;
+                DetonateBomb(cell_x + 1, cell_y + 1);
+            }
+            if (b_colors[gem_idx] != -1) {
+                b_ColorRemoved(cell_x + 1, cell_y + 1);
+                b_colors[gem_idx] = -1;
+                ++b_emptyCellsNum;
+            }
         }
+        --b_moveCount;
+        b_MoveCountUpdated();
+
         return true;
     }
 
     // detonate vertical bomb
     if (b_colors[cell_y * b_columns + cell_x] == 6) {
+        if (b_colors[cell_y * b_columns + cell_x] != -1)
+            b_ColorRemoved(cell_x, cell_y);
+        b_colors[cell_y * b_columns + cell_x] = -1;
+        ++b_emptyCellsNum;
+
         for (int i = 0; i < b_rows; ++i) {
-            b_colors[i * b_columns + cell_x] = -1;
-            b_ColorRemoved(cell_x, i);
-            ++b_emptyCellsNum;
+            const size_t gem_idx = i * b_columns + cell_x;
+            DecreaseNCheckObjectives(b_colors[gem_idx]);
+            if (b_colors[gem_idx] > 5 && b_colors[gem_idx] < 9) {
+                ++b_moveCount;
+                DetonateBomb(cell_x, i);
+            }
+            if (b_colors[gem_idx] != -1) {
+                b_ColorRemoved(cell_x, i);
+                b_colors[gem_idx] = -1;
+                ++b_emptyCellsNum;
+            }
         }
+        --b_moveCount;
+        b_MoveCountUpdated();
+
         return true;
     }
 
     // detonate horizontal bomb
     if (b_colors[cell_y * b_columns + cell_x] == 7) {
+        if (b_colors[cell_y * b_columns + cell_x] != -1)
+            b_ColorRemoved(cell_x, cell_y);
+        b_colors[cell_y * b_columns + cell_x] = -1;
+        ++b_emptyCellsNum;
+
         for (int i = 0; i < b_columns; ++i) {
-            b_colors[i + cell_y * b_columns] = -1;
-            b_ColorRemoved(i, cell_y);
-            ++b_emptyCellsNum;
+            const size_t gem_idx = i + cell_y * b_columns;
+            DecreaseNCheckObjectives(b_colors[gem_idx]);
+            if (b_colors[gem_idx] > 5 && b_colors[gem_idx] < 9) {
+                ++b_moveCount;
+                DetonateBomb(i, cell_y);
+            }
+            if (b_colors[gem_idx] != -1) {
+                b_ColorRemoved(i, cell_y);
+                b_colors[gem_idx] = -1;
+                ++b_emptyCellsNum;
+            }
         }
+        --b_moveCount;
+        b_MoveCountUpdated();
+
         return true;
     }
 
@@ -130,15 +241,17 @@ int BoardLogic::GetRandomColor()
 void BoardLogic::Generate()
 {
     // check that the two pieces to the left or two pieces down are not the same color as the gem added
-    for (int y = 0; y < b_rows; ++y) {
-        for (int x = 0; x < b_columns; ++x) {
-            int position = y * b_columns + x;
+    for (size_t y = 0; y < b_rows; ++y) {
+        for (size_t x = 0; x < b_columns; ++x) {
+            const auto position = y * b_columns + x;
+            int new_color = 0;
 
-            int new_color = GetRandomColor();
             do {
                 new_color = GetRandomColor();
-            } while ((x > 1 && b_colors[(x - 1) + (y * b_columns)] == new_color && b_colors[(x - 2) + (y * b_columns)] == new_color)
-                     || (y > 1 && b_colors[x + ((y - 1) * b_columns)] == new_color && b_colors[x + ((y - 2) * b_columns)] == new_color) || ((x > 1 && y > 1) && b_colors[x + (y - 1) * b_columns] == new_color));
+            } while (((x > 0 && y > 0) && b_colors[(x - 1) + ((y - 1) * b_columns)] == new_color && b_colors[(x - 1) + (y * b_columns)] == new_color && b_colors[x + ((y - 1) * b_columns)] == new_color) ||
+                     (x > 1 && b_colors[(x - 1) + (y * b_columns)] == new_color && b_colors[(x - 2) + (y * b_columns)] == new_color) ||
+                     (y > 1 && b_colors[x + ((y - 1) * b_columns)] == new_color && b_colors[x + ((y - 2) * b_columns)] == new_color) ||
+                     ((x > 1 && y > 1) && b_colors[x + (y - 1) * b_columns] == new_color));
             b_colors[position] = new_color;
         }
     }
@@ -150,8 +263,8 @@ void BoardLogic::DetectGemColorPatterns()
     // scan board rows to find horizontal color pattern
     for (int y = 0; y < b_rows; ++y) {
         for (int x = 0; x < b_columns; ++x) {
-            int position = y * b_columns + x;
-            int color = b_colors[position];
+            const int position = y * b_columns + x;
+            const int color = b_colors[position];
 
             // look in this row for a pattern
             int pattern_count_x = 1;
@@ -161,7 +274,7 @@ void BoardLogic::DetectGemColorPatterns()
             int matching_color = color;
 
             while (true) {
-                int search_position = position + pattern_count_x;
+                const int search_position = position + pattern_count_x;
 
                 // look for a pattern in the same row
                 if (position / b_columns != search_position / b_columns)
@@ -231,10 +344,10 @@ void BoardLogic::DetectGemSquareColorPatterns()
     for (int y = 0; y < b_rows - 1; ++y) {
         for (int x = 0; x < b_columns - 1; ++x) {
             // get positions of 4 adjacent cells
-            int position1 = y * b_columns + x;
-            int position2 = y * b_columns + x + 1;
-            int position3 = (y + 1) * b_columns + x;
-            int position4 = (y + 1) * b_columns + x + 1;
+            const int position1 = y * b_columns + x;
+            const int position2 = y * b_columns + x + 1;
+            const int position3 = (y + 1) * b_columns + x;
+            const int position4 = (y + 1) * b_columns + x + 1;
 
             // make sure that cells are in same row
             if (position1 / b_columns != position2 / b_columns && position3 / b_columns != position4 / b_columns)
@@ -272,6 +385,7 @@ void BoardLogic::RemovePattern()
 {
     for (int i = 0; i < b_rows * b_columns; ++i) {
         if (b_colorPatterns.at(i) == true) {
+            DecreaseNCheckObjectives(b_colors[i]);
             b_colors[i] = -1;
 
             // invoke removal event
@@ -293,7 +407,7 @@ void BoardLogic::SpawnColors()
     // iterate backwards and look for empty cells
     for (int y = b_rows - 1; y >= 0; --y) {
         for (int x = b_columns - 1; x >= 0; --x) {
-            int position = y * b_columns + x;
+            const int position = y * b_columns + x;
 
             // check for empty cell here
             if (b_colors[position] == -1) {
@@ -330,7 +444,7 @@ void BoardLogic::SpawnBomb(int cell_x, int cell_y)
 {
     while (!b_bombPositions.empty()) {
         // get bomb position and type
-        auto it = b_bombPositions.begin();
+        const auto it = b_bombPositions.cbegin();
         b_colors[it->first] = it->second;
         b_BombAdded(it->first % b_columns, it->first / b_columns);
         b_bombPositions.erase(it);
@@ -342,7 +456,7 @@ bool BoardLogic::IsPartOfSamePattern(int cell_x, int cell_y) const
 {
     // look in all directions to find pattern
 
-    int source_color = b_colors[cell_y * b_columns + cell_x];
+    const int source_color = b_colors[cell_y * b_columns + cell_x];
 
     // look right
     if (cell_x < (b_columns - 2)) {
@@ -408,24 +522,45 @@ bool BoardLogic::IsPartOfSamePattern(int cell_x, int cell_y) const
     return false;
 }
 
+void BoardLogic::DecreaseNCheckObjectives(int gem)
+{
+    if (const auto &o = b_objectives.find(gem); o != b_objectives.end()) {
+        --o->second;
+        if (o->second < 0)
+            o->second = 0;
+    }
+
+    b_ObjectivesUpdated();
+}
+
 void BoardLogic::ColorAddedHandler(std::function<void(int, int)> handlerFunction)
 {
     b_ColorAdded = handlerFunction;
 }
 
-void BoardLogic::ColorRemovedHandler(std::function<void(int, int)> handlerFunction)
+void BoardLogic::ColorRemovedHandler(std::function<void(int, int)> handler_function)
 {
-    b_ColorRemoved = handlerFunction;
+    b_ColorRemoved = handler_function;
 }
 
-void BoardLogic::ColorSpawnedHandler(std::function<void(int, int)> handlerFunction)
+void BoardLogic::ColorSpawnedHandler(std::function<void(int, int)> handler_function)
 {
-    b_ColorSpawned = handlerFunction;
+    b_ColorSpawned = handler_function;
 }
 
-void BoardLogic::BombAddedHandler(std::function<void(int, int)> handlerFunction)
+void BoardLogic::BombAddedHandler(std::function<void(int, int)> handler_function)
 {
-    b_BombAdded = handlerFunction;
+    b_BombAdded = handler_function;
+}
+
+void BoardLogic::MoveCountHandler(std::function<void()> handler_function)
+{
+    b_MoveCountUpdated = handler_function;
+}
+
+void BoardLogic::ObjectiveUpdateHandler(std::function<void()> handler_function)
+{
+    b_ObjectivesUpdated = handler_function;
 }
 
 int BoardLogic::GetColumns() const
@@ -450,4 +585,14 @@ int BoardLogic::GetGemColor(int column, int row) const
 int BoardLogic::GetEmptyCells() const
 {
     return b_emptyCellsNum;
+}
+
+int BoardLogic::GetMoveCount() const
+{
+    return b_moveCount;
+}
+
+const std::map<int, int> &BoardLogic::GetObjectives() const
+{
+    return b_objectives;
 }

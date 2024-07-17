@@ -3,8 +3,8 @@
 
 int main()
 {
-    std::unique_ptr<GameController> gc = std::make_unique<GameController>();
-    gc->Execute();
+    GameController gc;
+    gc.Execute();
 
     return 0;
 }

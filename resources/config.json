@@ -1,7 +1,7 @@
 {
   "col_size": 6,
   "row_size": 7,
-  "moves count": 10,
+  "moves count": 15,
   "obj_num": 3,
   "objectives" : {
     "red": 10,
