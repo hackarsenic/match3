@@ -22,10 +22,10 @@ BoardLogic::BoardLogic()
     }
 }
 
-bool BoardLogic::SwapGemColors(int source_x, int source_y, int target_x, int target_y)
+bool BoardLogic::SwapGemColors(unsigned source_x, unsigned source_y, unsigned target_x, unsigned target_y)
 {
-    const int source_position = source_y * b_columns + source_x;
-    const int target_position = target_y * b_columns + target_x;
+    const unsigned source_position = source_y * b_columns + source_x;
+    const unsigned target_position = target_y * b_columns + target_x;
 
     // try to swap colors - check for pattern
     const int source_color = b_colors[source_y * b_columns + source_x];
@@ -52,7 +52,7 @@ bool BoardLogic::SwapGemColors(int source_x, int source_y, int target_x, int tar
 bool BoardLogic::DetonateBomb(int cell_x, int cell_y)
 {
     // Square bomb detonation case
-    if (b_colors[cell_y * b_columns + cell_x] == 8) {
+    if (b_colors[cell_y * b_columns + cell_x] == static_cast<int>(Gem::Color::Bomb)) {
         if (b_colors[cell_y * b_columns + cell_x] != -1)
             b_ColorRemoved(cell_x, cell_y);
         b_colors[cell_y * b_columns + cell_x] = -1;
@@ -64,7 +64,7 @@ bool BoardLogic::DetonateBomb(int cell_x, int cell_y)
         if (is_valid(cell_y - 1, cell_x - 1)) {
             const size_t gem_idx = (cell_y - 1) * b_columns + cell_x - 1;
             DecreaseNCheckObjectives(b_colors[gem_idx]);
-            if (b_colors[gem_idx] > 5 && b_colors[gem_idx] < 9) {
+            if (b_colors[gem_idx] > static_cast<int>(Gem::Color::COUNT) && b_colors[gem_idx] < 9) {
                 ++b_moveCount;
                 DetonateBomb(cell_x - 1, cell_y - 1);
             }
@@ -78,7 +78,7 @@ bool BoardLogic::DetonateBomb(int cell_x, int cell_y)
         if (is_valid(cell_y - 1, cell_x)) {
             const size_t gem_idx = (cell_y - 1) * b_columns + cell_x;
             DecreaseNCheckObjectives(b_colors[gem_idx]);
-            if (b_colors[gem_idx] > 5 && b_colors[gem_idx] < 9) {
+            if (b_colors[gem_idx] > static_cast<int>(Gem::Color::COUNT) && b_colors[gem_idx] < 9) {
                 ++b_moveCount;
                 DetonateBomb(cell_x, cell_y - 1);
             }
@@ -92,7 +92,7 @@ bool BoardLogic::DetonateBomb(int cell_x, int cell_y)
         if (is_valid(cell_y - 1, cell_x + 1)) {
             const size_t gem_idx = (cell_y - 1) * b_columns + cell_x + 1;
             DecreaseNCheckObjectives(b_colors[gem_idx]);
-            if (b_colors[gem_idx] > 5 && b_colors[gem_idx] < 9) {
+            if (b_colors[gem_idx] > static_cast<int>(Gem::Color::COUNT) && b_colors[gem_idx] < 9) {
                 ++b_moveCount;
                 DetonateBomb(cell_x + 1, cell_y - 1);
             }
@@ -106,7 +106,7 @@ bool BoardLogic::DetonateBomb(int cell_x, int cell_y)
         if (is_valid(cell_y, cell_x - 1)) {
             const size_t gem_idx = cell_y * b_columns + cell_x - 1;
             DecreaseNCheckObjectives(b_colors[gem_idx]);
-            if (b_colors[gem_idx] > 5 && b_colors[gem_idx] < 9) {
+            if (b_colors[gem_idx] > static_cast<int>(Gem::Color::COUNT) && b_colors[gem_idx] < 9) {
                 ++b_moveCount;
                 DetonateBomb(cell_x - 1, cell_y);
             }
@@ -120,7 +120,7 @@ bool BoardLogic::DetonateBomb(int cell_x, int cell_y)
         if (is_valid(cell_y, cell_x + 1)) {
             const size_t gem_idx = cell_y * b_columns + cell_x + 1;
             DecreaseNCheckObjectives(b_colors[gem_idx]);
-            if (b_colors[gem_idx] > 5 && b_colors[gem_idx] < 9) {
+            if (b_colors[gem_idx] > static_cast<int>(Gem::Color::COUNT) && b_colors[gem_idx] < 9) {
                 ++b_moveCount;
                 DetonateBomb(cell_x + 1, cell_y);
             }
@@ -134,7 +134,7 @@ bool BoardLogic::DetonateBomb(int cell_x, int cell_y)
         if (is_valid(cell_y + 1, cell_x - 1)) {
             const size_t gem_idx = (cell_y + 1) * b_columns + cell_x - 1;
             DecreaseNCheckObjectives(b_colors[gem_idx]);
-            if (b_colors[gem_idx] > 5 && b_colors[gem_idx] < 9) {
+            if (b_colors[gem_idx] > static_cast<int>(Gem::Color::COUNT) && b_colors[gem_idx] < 9) {
                 ++b_moveCount;
                 DetonateBomb(cell_x - 1, cell_y + 1);
             }
@@ -148,7 +148,7 @@ bool BoardLogic::DetonateBomb(int cell_x, int cell_y)
         if (is_valid(cell_y + 1, cell_x)) {
             const size_t gem_idx = (cell_y + 1) * b_columns + cell_x;
             DecreaseNCheckObjectives(b_colors[gem_idx]);
-            if (b_colors[gem_idx] > 5 && b_colors[gem_idx] < 9) {
+            if (b_colors[gem_idx] > static_cast<int>(Gem::Color::COUNT) && b_colors[gem_idx] < 9) {
                 ++b_moveCount;
                 DetonateBomb(cell_x, cell_y + 1);
             }
@@ -162,7 +162,7 @@ bool BoardLogic::DetonateBomb(int cell_x, int cell_y)
         if (is_valid(cell_y + 1, cell_x + 1)) {
             const size_t gem_idx = (cell_y + 1) * b_columns + cell_x + 1;
             DecreaseNCheckObjectives(b_colors[gem_idx]);
-            if (b_colors[gem_idx] > 5 && b_colors[gem_idx] < 9) {
+            if (b_colors[gem_idx] > static_cast<int>(Gem::Color::COUNT) && b_colors[gem_idx] < 9) {
                 ++b_moveCount;
                 DetonateBomb(cell_x + 1, cell_y + 1);
             }
@@ -179,7 +179,7 @@ bool BoardLogic::DetonateBomb(int cell_x, int cell_y)
     }
 
     // detonate vertical bomb
-    if (b_colors[cell_y * b_columns + cell_x] == 6) {
+    if (b_colors[cell_y * b_columns + cell_x] == static_cast<int>(Gem::Color::Bomb_V)) {
         if (b_colors[cell_y * b_columns + cell_x] != -1)
             b_ColorRemoved(cell_x, cell_y);
         b_colors[cell_y * b_columns + cell_x] = -1;
@@ -188,7 +188,7 @@ bool BoardLogic::DetonateBomb(int cell_x, int cell_y)
         for (int i = 0; i < b_rows; ++i) {
             const size_t gem_idx = i * b_columns + cell_x;
             DecreaseNCheckObjectives(b_colors[gem_idx]);
-            if (b_colors[gem_idx] > 5 && b_colors[gem_idx] < 9) {
+            if (b_colors[gem_idx] > static_cast<int>(Gem::Color::COUNT) && b_colors[gem_idx] < 9) {
                 ++b_moveCount;
                 DetonateBomb(cell_x, i);
             }
@@ -205,7 +205,7 @@ bool BoardLogic::DetonateBomb(int cell_x, int cell_y)
     }
 
     // detonate horizontal bomb
-    if (b_colors[cell_y * b_columns + cell_x] == 7) {
+    if (b_colors[cell_y * b_columns + cell_x] == static_cast<int>(Gem::Color::Bomb_H)) {
         if (b_colors[cell_y * b_columns + cell_x] != -1)
             b_ColorRemoved(cell_x, cell_y);
         b_colors[cell_y * b_columns + cell_x] = -1;
@@ -383,7 +383,7 @@ bool BoardLogic::HasPatterns() const
 
 void BoardLogic::RemovePattern()
 {
-    for (int i = 0; i < b_rows * b_columns; ++i) {
+    for (unsigned i = 0; i < b_rows * b_columns; ++i) {
         if (b_colorPatterns.at(i) == true) {
             DecreaseNCheckObjectives(b_colors[i]);
             b_colors[i] = -1;
@@ -452,11 +452,15 @@ void BoardLogic::SpawnBomb(int cell_x, int cell_y)
     }
 }
 
-bool BoardLogic::IsPartOfSamePattern(int cell_x, int cell_y) const
+bool BoardLogic::IsPartOfSamePattern(unsigned cell_x, unsigned cell_y) const
 {
     // look in all directions to find pattern
 
     const int source_color = b_colors[cell_y * b_columns + cell_x];
+
+    // prevent bomb pattern detection
+    if (source_color > static_cast<int>(Gem::Color::COUNT))
+        return false;
 
     // look right
     if (cell_x < (b_columns - 2)) {
@@ -533,42 +537,42 @@ void BoardLogic::DecreaseNCheckObjectives(int gem)
     b_ObjectivesUpdated();
 }
 
-void BoardLogic::ColorAddedHandler(std::function<void(int, int)> handlerFunction)
+void BoardLogic::ColorAddedHandler(std::function<void(int, int)> handler_function)
 {
-    b_ColorAdded = handlerFunction;
+    b_ColorAdded = std::move(handler_function);
 }
 
 void BoardLogic::ColorRemovedHandler(std::function<void(int, int)> handler_function)
 {
-    b_ColorRemoved = handler_function;
+    b_ColorRemoved = std::move(handler_function);
 }
 
 void BoardLogic::ColorSpawnedHandler(std::function<void(int, int)> handler_function)
 {
-    b_ColorSpawned = handler_function;
+    b_ColorSpawned = std::move(handler_function);
 }
 
 void BoardLogic::BombAddedHandler(std::function<void(int, int)> handler_function)
 {
-    b_BombAdded = handler_function;
+    b_BombAdded = std::move(handler_function);
 }
 
 void BoardLogic::MoveCountHandler(std::function<void()> handler_function)
 {
-    b_MoveCountUpdated = handler_function;
+    b_MoveCountUpdated = std::move(handler_function);
 }
 
 void BoardLogic::ObjectiveUpdateHandler(std::function<void()> handler_function)
 {
-    b_ObjectivesUpdated = handler_function;
+    b_ObjectivesUpdated = std::move(handler_function);
 }
 
-int BoardLogic::GetColumns() const
+unsigned BoardLogic::GetColumns() const
 {
     return b_columns;
 }
 
-int BoardLogic::GetRows() const
+unsigned BoardLogic::GetRows() const
 {
     return b_rows;
 }

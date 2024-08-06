@@ -15,7 +15,7 @@ public:
     void Generate();
 
     // swap source cell and target cell
-    bool SwapGemColors(int source_x, int sourceY, int targetX, int targetY);
+    bool SwapGemColors(unsigned source_x, unsigned sourceY, unsigned targetX, unsigned targetY);
 
     // Blows up the selected bomb
     bool DetonateBomb(int cell_x, int cell_y);
@@ -27,7 +27,7 @@ public:
     void DetectGemSquareColorPatterns();
 
     // check if current board state contains patterns
-    bool HasPatterns() const;
+    [[nodiscard]] bool HasPatterns() const;
 
     // remove matching color patterns
     void RemovePattern();
@@ -40,17 +40,17 @@ public:
     void SpawnBomb(int cell_x, int cell_y);
 
     // returns the amount of columns
-    int GetColumns() const;
+    [[nodiscard]] unsigned GetColumns() const;
     // returns the amount of rows
-    int GetRows() const;
+    [[nodiscard]] unsigned GetRows() const;
     // returns cell color
-    int GetGemColor(int column, int row) const;
+    [[nodiscard]] int GetGemColor(int column, int row) const;
     // returns amount of empty cells
-    int GetEmptyCells() const;
+    [[nodiscard]] int GetEmptyCells() const;
     // returns remaining move number
-    int GetMoveCount() const;
+    [[nodiscard]] int GetMoveCount() const;
     // returns current state of objectives
-    const std::map<int, int> &GetObjectives() const;
+    [[nodiscard]] const std::map<int, int> &GetObjectives() const;
 
     // methods for registering state changes (color changes)
     void ColorAddedHandler(std::function<void(int, int)> handler_function);
@@ -65,15 +65,15 @@ private:
     int GetRandomColor();
 
     // check if selected color is part of patterns
-    bool IsPartOfSamePattern(int cell_x, int cell_y) const;
+    bool IsPartOfSamePattern(unsigned cell_x, unsigned cell_y) const;
 
     // check if objective found
     void DecreaseNCheckObjectives(int gem);
 
 private:
     // board size
-    int b_columns;
-    int b_rows;
+    unsigned b_columns;
+    unsigned b_rows;
 
     // win conditions
     int b_moveCount;
@@ -98,10 +98,10 @@ private:
     std::uniform_int_distribution<int> b_unifINTDist;
 
     // handler functions
-    std::function<void(int, int)> b_ColorSpawned;
-    std::function<void(int, int)> b_ColorAdded;
-    std::function<void(int, int)> b_ColorRemoved;
-    std::function<void(int, int)> b_BombAdded;
+    std::function<void(unsigned, unsigned)> b_ColorSpawned;
+    std::function<void(unsigned, unsigned)> b_ColorAdded;
+    std::function<void(unsigned, unsigned)> b_ColorRemoved;
+    std::function<void(unsigned, unsigned)> b_BombAdded;
     std::function<void()> b_MoveCountUpdated;
     std::function<void()> b_ObjectivesUpdated;
 };

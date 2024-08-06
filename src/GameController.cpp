@@ -31,7 +31,7 @@ void GameController::InitWindowSize()
     const auto &config = GameConfig::GetInstance();
 
     g_windowWidth = config.GetCellSize() * (config.GetColSize() + 2);
-    g_windowHeight = config.GetCellSize() * (config.GetRowSize() + 5);
+    g_windowHeight = config.GetCellSize() * (config.GetRowSize() + 4);
 }
 
 int GameController::Execute()
@@ -46,8 +46,8 @@ int GameController::Execute()
     DrawSplashScreen failed_screen(sf::Color(165, 39, 23), "Game Over");
 
     while (g_appRenderWindow->isOpen()) {
-        sf::Event event;
-        g_appRenderWindow->clear(Color(50, 50, 50, 255));
+        sf::Event event{};
+        g_appRenderWindow->clear(Color(50, 71, 76, 255));
 
         switch (g_gameStatus) {
             case GameStatus::Started :

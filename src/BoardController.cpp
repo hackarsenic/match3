@@ -5,7 +5,7 @@
 #include "BoardController.h"
 #include "Gem.h"
 
-BoardController::BoardController(int render_window_w, int render_window_h)
+BoardController::BoardController(unsigned render_window_w, unsigned render_window_h)
     : b_sourceCellX(0),
       b_sourceCellY(0),
       b_targetCellX(0),
@@ -20,12 +20,12 @@ BoardController::BoardController(int render_window_w, int render_window_h)
     b_drawBoard->SetPosition(GameConfig::GetInstance().GetCellSize(), GameConfig::GetInstance().GetCellSize() * 3);
 
     // register callbacks
-    b_drawBoard->GemsSelectedHandler([this](int sourceX, int sourceY, int targetX, int targetY) { return OnGemSelect(sourceX, sourceY, targetX, targetY); });
-    b_drawBoard->BombSelectedHandler([this](int column, int row) { return OnBombSelect(column, row); });
-    b_boardLogic->ColorAddedHandler([this](int column, int row) { return OnColorAdd(column, row); });
-    b_boardLogic->ColorRemovedHandler([this](int column, int row) { return OnColorRemove(column, row); });
-    b_boardLogic->ColorSpawnedHandler([this](int column, int row) { return OnColorSpawn(column, row); });
-    b_boardLogic->BombAddedHandler([this](int column, int row) { return OnBombSpawn(column, row); });
+    b_drawBoard->GemsSelectedHandler([this](unsigned sourceX, unsigned sourceY, unsigned targetX, unsigned targetY) { return OnGemSelect(sourceX, sourceY, targetX, targetY); });
+    b_drawBoard->BombSelectedHandler([this](unsigned column, unsigned row) { return OnBombSelect(column, row); });
+    b_boardLogic->ColorAddedHandler([this](unsigned column, unsigned row) { return OnColorAdd(column, row); });
+    b_boardLogic->ColorRemovedHandler([this](unsigned column, unsigned row) { return OnColorRemove(column, row); });
+    b_boardLogic->ColorSpawnedHandler([this](unsigned column, unsigned row) { return OnColorSpawn(column, row); });
+    b_boardLogic->BombAddedHandler([this](unsigned column, unsigned row) { return OnBombSpawn(column, row); });
     b_boardLogic->MoveCountHandler([this]() { return OnMoveUpdate(); });
     b_boardLogic->ObjectiveUpdateHandler( [this]() { return OnObjectiveHit(); });
 
@@ -33,12 +33,12 @@ BoardController::BoardController(int render_window_w, int render_window_h)
     b_boardLogic->Generate();
 
     // board dimensions
-    const int columns = b_boardLogic->GetColumns();
-    const int rows = b_boardLogic->GetRows();
+    const unsigned columns = b_boardLogic->GetColumns();
+    const unsigned rows = b_boardLogic->GetRows();
 
     // get gems to draw on board
-    for (int y = 0; y < rows; ++y) {
-        for (int x = 0; x < columns; ++x) {
+    for (unsigned y = 0; y < rows; ++y) {
+        for (unsigned x = 0; x < columns; ++x) {
             int color = b_boardLogic->GetGemColor(x, y);
             b_drawBoard->Add(x, y, Gem::Color(color));
         }
@@ -85,7 +85,7 @@ void BoardController::Update()
     }
 }
 
-constexpr void BoardController::OnGemSelect(int source_x, int source_y, int target_x, int target_y)
+constexpr void BoardController::OnGemSelect(unsigned source_x, unsigned source_y, unsigned target_x, unsigned target_y)
 {
     // store coordinates of source and target cells
     b_sourceCellX = source_x;
@@ -97,7 +97,7 @@ constexpr void BoardController::OnGemSelect(int source_x, int source_y, int targ
     b_boardState = BoardState::GemsSelectState;
 }
 
-bool BoardController::OnBombSelect(int column, int row)
+bool BoardController::OnBombSelect(unsigned column, unsigned row)
 {
     // Try to detonate bomb if bomb is selected
     if (b_boardLogic->DetonateBomb(column, row)) {
@@ -186,7 +186,7 @@ void BoardController::SpawnGems()
     }
 }
 
-void BoardController::OnColorAdd(int column, int row)
+void BoardController::OnColorAdd(unsigned column, unsigned row)
 {
     // retrieve color
     const int color = b_boardLogic->GetGemColor(column, row);
@@ -194,12 +194,12 @@ void BoardController::OnColorAdd(int column, int row)
     b_drawBoard->Add(column, row, Gem::Color(color));
 }
 
-void BoardController::OnColorRemove(int column, int row)
+void BoardController::OnColorRemove(unsigned column, unsigned row)
 {
     b_drawBoard->MarkRemoved(column, row);
 }
 
-void BoardController::OnColorSpawn(int column, int row)
+void BoardController::OnColorSpawn(unsigned column, unsigned row)
 {
     // retrieve gem at position
     const auto &gem = b_drawBoard->GetGem(column, row);
@@ -207,7 +207,7 @@ void BoardController::OnColorSpawn(int column, int row)
     b_drawBoard->Move(gem, column, row + 1);
 }
 
-void BoardController::OnBombSpawn(int column, int row)
+void BoardController::OnBombSpawn(unsigned column, unsigned row)
 {
     // retrieve color
     const int color = b_boardLogic->GetGemColor(column, row);

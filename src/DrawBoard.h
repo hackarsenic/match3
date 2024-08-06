@@ -1,7 +1,9 @@
 #pragma once
 
 #include <functional>
+
 #include <SFML/Graphics.hpp>
+
 #include "Gem.h"
 
 class Gem;
@@ -20,26 +22,26 @@ public:
 
     friend class Animation;
 
-    DrawBoard(int render_window_w, int render_window_h);
+    DrawBoard(unsigned render_window_w, unsigned render_window_h);
     ~DrawBoard() override = default;
 
     // position of the board
-    void SetPosition(int x, int y);
+    void SetPosition(float x, float y);
 
     // gets gem of selected cell
-    std::shared_ptr<Gem> GetGem(int column, int row);
+    std::shared_ptr<Gem> GetGem(unsigned column, unsigned row);
 
     // check if animation playing
     bool GetAnimationState() const { return d_isAnimating; }
 
     // adds gem to cell of specified color
-    void Add(int column, int row, Gem::Color color);
+    void Add(unsigned column, unsigned row, Gem::Color color);
 
     // removes gem from cell
-    void MarkRemoved(int column, int row);
+    void MarkRemoved(unsigned column, unsigned row);
 
     // moves gem to target cell
-    void Move(const std::shared_ptr<Gem> &move_gem, int column, int row);
+    void Move(const std::shared_ptr<Gem> &move_gem, unsigned column, unsigned row);
 
     // updates move number on scoreboard
     void UpdateMoveCount(int move_count);
@@ -47,8 +49,8 @@ public:
     void UpdateObjectives(const std::map<int, int> &objectives);
 
     // method registers gem selection event
-    void GemsSelectedHandler(std::function<void(int, int, int, int)> handlerFunction);
-    void BombSelectedHandler(std::function<bool(int, int)> handlerFunction);
+    void GemsSelectedHandler(std::function<void(unsigned, unsigned, unsigned, unsigned)> handlerFunction);
+    void BombSelectedHandler(std::function<bool(unsigned, unsigned)> handlerFunction);
     void ScaleAnimationHandler(std::function<void(const std::shared_ptr<Gem> &, const sf::Vector2f &)> handlerFunction);
     void MoveHorizAnimationHandler(std::function<void(const std::shared_ptr<Gem> &, const sf::Vector2f &)> handlerFunction);
     void MoveVertAnimationHandler(std::function<void(const std::shared_ptr<Gem> &, const sf::Vector2f &)> handlerFunction);
@@ -80,20 +82,20 @@ private:
     constexpr void SwapCells(int first_cell, int second_cell);
 
     // Try blow bomb if found
-    bool DetonateBomb(int cell);
+    bool DetonateBomb(unsigned cell);
 
 private:
     // amount of cells
-    int d_columns;
-    int d_rows;
+    unsigned d_columns;
+    unsigned d_rows;
 
     // position and dimensions of the board
-    int d_positionX;
-    int d_positionY;
+    float d_positionX;
+    float d_positionY;
 
     // dimensions of the cells
-    int d_cellWidth;
-    int d_cellHeight;
+    unsigned d_cellWidth;
+    unsigned d_cellHeight;
 
     // remaining player moves
     int d_currentMoveCount;
@@ -112,7 +114,7 @@ private:
     DrawBoardState d_state;
 
     // track selection
-    int d_selectedCell;
+    unsigned d_selectedCell;
 
     // holds info if gem is selected
     bool d_isGemSelected;
@@ -135,8 +137,8 @@ private:
     sf::Font d_scoreFont;
 
     // gameplay handler functions
-    std::function<void(int, int, int, int)> d_GemsSelected;
-    std::function<bool(int, int)> d_BombSelected;
+    std::function<void(unsigned, unsigned, unsigned, unsigned)> d_GemsSelected;
+    std::function<bool(unsigned, unsigned)> d_BombSelected;
 
     // animation handler functions
     std::function<void(const std::shared_ptr<Gem> &, const sf::Vector2f &)> d_PlayScaleAnimation;
@@ -144,6 +146,6 @@ private:
     std::function<void(const std::shared_ptr<Gem> &, const sf::Vector2f &)> d_PlayMoveVertAnimation;
 
     // resolution of view board will be drawn on
-    int d_ResolutionW;
-    int d_ResolutionH;
+    unsigned d_ResolutionW;
+    unsigned d_ResolutionH;
 };

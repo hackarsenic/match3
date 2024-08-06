@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include "GameConfig.h"
 
 bool GameConfig::g_isConfigLoaded = false;
@@ -14,7 +16,7 @@ GameConfig &GameConfig::GetInstance()
 
 void GameConfig::InitConfig()
 {
-    std::ifstream config_file(std::string(PATH_TO_RECOURCES) + "config.json", std::ifstream::in);
+    std::ifstream config_file(g_pathToResources / "config.json", std::ifstream::in);
     if (config_file.good()) {
         json config = json::parse(config_file);
 
@@ -37,4 +39,5 @@ void GameConfig::InitConfig()
 
         g_isConfigLoaded = true;
     }
+    config_file.close();
 }

@@ -14,7 +14,7 @@ DrawSplashScreen::DrawSplashScreen(const sf::Color &color, const std::string &te
     win_texture.update(img);
     d_Sprite->setTexture(win_texture);
 
-    d_TextFont.loadFromFile(std::string(PATH_TO_RECOURCES) + "arial.ttf");
+    d_TextFont.loadFromFile(std::filesystem::path(std::move(GameConfig::GetInstance().GetResourcePath() / "arial.ttf")).string());
     sf::Text win_text(text, d_TextFont);
     win_text.setCharacterSize(70);
     const auto text_l_bbox = win_text.getLocalBounds();
@@ -53,7 +53,7 @@ void DrawSplashScreen::draw(sf::RenderTarget &target, sf::RenderStates ) const
 {
     const auto sprite_l_bbox = d_Sprite->getLocalBounds();
     d_Sprite->setOrigin(sprite_l_bbox.left + sprite_l_bbox.width / 2.0f,
-                           sprite_l_bbox.top + sprite_l_bbox.height / 2.0f);
+                        sprite_l_bbox.top + sprite_l_bbox.height / 2.0f);
     d_Sprite->setPosition(target.getSize().x / 2.0f, target.getSize().y / 2.0f);
     target.draw(*d_Sprite);
 }

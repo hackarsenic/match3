@@ -1,10 +1,7 @@
 #pragma once
 
-#include <fstream>
-
 #include "Gem.h"
 #include "json.hpp"
-#include "resources.h"
 
 using nlohmann::json;
 
@@ -13,11 +10,12 @@ class GameConfig
 public:
     static GameConfig &GetInstance();
 
-    constexpr uint16_t GetCellSize() const { return g_cellSize; }
-    constexpr uint16_t GetRowSize() const { return g_rowSize; }
-    constexpr uint16_t GetColSize() const { return g_colSize; }
-    constexpr int16_t GetMoveCount() const { return g_moveCount; }
-    std::map<int, int> GetObjectives() const { return g_objectives; }
+    [[nodiscard]] const std::filesystem::path &GetResourcePath() const { return g_pathToResources; }
+    [[nodiscard]] constexpr unsigned GetCellSize() const { return g_cellSize; }
+    [[nodiscard]] constexpr unsigned GetRowSize() const { return g_rowSize; }
+    [[nodiscard]] constexpr unsigned GetColSize() const { return g_colSize; }
+    [[nodiscard]] constexpr int GetMoveCount() const { return g_moveCount; }
+    [[nodiscard]] std::map<int, int> GetObjectives() const { return g_objectives; }
 
     GameConfig(const GameConfig &rhs) = delete;
     GameConfig &operator=(const GameConfig &rhs) = delete;
@@ -29,10 +27,10 @@ private:
 private:
     static bool g_isConfigLoaded;
 
-    const uint16_t g_cellSize = 75;
-    uint16_t g_rowSize = 5;
-    uint16_t g_colSize = 5;
-    int16_t g_moveCount = -1;
+    const std::filesystem::path g_pathToResources = "./resources/";
+    const unsigned g_cellSize = 75;
+    unsigned g_rowSize = 5;
+    unsigned g_colSize = 5;
+    int g_moveCount = -1;
     std::map<int, int> g_objectives;
 };
-

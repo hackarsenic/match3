@@ -3,9 +3,11 @@
 #include <memory>
 #include <cstdint>
 #include <string>
-#include "ResourceManager.h"
-#include "SFML/Graphics.hpp"
 #include <unordered_map>
+
+#include <SFML/Graphics.hpp>
+
+#include "ResourceManager.h"
 
 /*! Holds the visual representation of a color
  *
@@ -46,21 +48,16 @@ public:
     void SetState(const State &newState);
 
     // get gem state
-    const State &GetState() const;
+    [[nodiscard]] const State &GetState() const;
 
     // get gem sprite
-    const std::shared_ptr<sf::Sprite> &GetSprite() const { return g_sprite; }
+    [[nodiscard]] const std::shared_ptr<sf::Sprite> &GetSprite() const;
 
-    static const std::unordered_map<Gem::Color, sf::Sprite> &GetGemSpriteMap() { return g_colorSpriteMap; }
-//    static const std::unordered_map<Gem::Color, std::shared_ptr<sf::Sprite>> &GetGemSpriteMap() { return g_colorSpriteMap; }
+    static const std::unordered_map<Gem::Color, sf::Sprite> &GetGemSpriteMap();
 
 private:
     Color g_color;
     State g_state;
 
     std::shared_ptr<sf::Sprite> g_sprite;
-
-    // map containing color and sprite
-    static std::unordered_map<Gem::Color, sf::Sprite> g_colorSpriteMap;
-//    static std::unordered_map<Gem::Color, std::shared_ptr<sf::Sprite>> g_colorSpriteMap;
 };

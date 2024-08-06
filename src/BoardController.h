@@ -22,19 +22,19 @@ public:
         GemsSpawnState
     };
 
-    BoardController(int render_window_w, int render_window_h);
+    BoardController(unsigned render_window_w, unsigned render_window_h);
 
     // update board state
     void Update();
 
     // get loose condition status
-    bool GetGameOverStatus() const { return b_isGameOver; }
+    [[nodiscard]] bool GetGameOverStatus() const { return b_isGameOver; }
 
     // get win condition status
-    bool GetWinStatus() const { return b_isWin; }
+    [[nodiscard]] bool GetWinStatus() const { return b_isWin; }
 
     // get pointer to DrawBoard
-    std::shared_ptr<DrawBoard> GetDrawBoard() const { return b_drawBoard; }
+    [[nodiscard]] std::shared_ptr<DrawBoard> GetDrawBoard() const { return b_drawBoard; }
 
 private:
     // swap gems if pattern is found
@@ -56,22 +56,22 @@ private:
     void SpawnGems();
 
     // callback function for two gems have been selected
-    constexpr void OnGemSelect(int source_x, int source_y, int target_x, int target_y);
+    constexpr void OnGemSelect(unsigned source_x, unsigned source_y, unsigned target_x, unsigned target_y);
 
     // callback function for new added color
-    void OnColorAdd(int column, int row);
+    void OnColorAdd(unsigned column, unsigned row);
 
     // callback function for color removed from the board
-    void OnColorRemove(int column, int row);
+    void OnColorRemove(unsigned column, unsigned row);
 
     // callback function for color spawned
-    void OnColorSpawn(int column, int row);
+    void OnColorSpawn(unsigned column, unsigned row);
 
     // callback function for bomb spawn
-    void OnBombSpawn(int column, int row);
+    void OnBombSpawn(unsigned column, unsigned row);
 
     // callback function for bomb detonate
-    bool OnBombSelect(int column, int row);
+    bool OnBombSelect(unsigned column, unsigned row);
 
     // callback function for move count update
     void OnMoveUpdate();
@@ -81,10 +81,10 @@ private:
 
 private:
     // store selected gems
-    int b_sourceCellX;
-    int b_sourceCellY;
-    int b_targetCellX;
-    int b_targetCellY;
+    unsigned b_sourceCellX;
+    unsigned b_sourceCellY;
+    unsigned b_targetCellX;
+    unsigned b_targetCellY;
 
     bool b_isGameOver;
     bool b_isWin;

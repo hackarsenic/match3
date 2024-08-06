@@ -2,7 +2,6 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include <stdio.h>
 
 #include "BoardController.h"
 #include "DrawBoard.h"
@@ -29,8 +28,8 @@ private:
     void InitWindowSize();
 
     // inital window dimensions
-    uint16_t g_windowWidth;
-    uint16_t g_windowHeight;
+    unsigned g_windowWidth;
+    unsigned g_windowHeight;
 
     // controller that handles game logic
     std::unique_ptr<BoardController> g_boardController;

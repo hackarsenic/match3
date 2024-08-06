@@ -3,7 +3,8 @@
 #include <map>
 #include <memory>
 
-#include "SFML/Graphics.hpp"
+#include <SFML/Graphics.hpp>
+
 #include "DrawBoard.h"
 
 class Animation
