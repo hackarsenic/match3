@@ -1,53 +1,105 @@
 #include <SFML/Graphics.hpp>
 
-#include "GameController.hpp"
-#include <functional>
-#include "DrawBoard.hpp"
-#include "BoardController.hpp"
+#include "GameController.h"
+#include "BoardController.h"
+#include "Animation.h"
+#include "GameConfig.h"
+#include "DrawSplashScreen.h"
 
-
+GameController::GameController()
+    : g_windowWidth(0),
+      g_windowHeight(0),
+      g_gameStatus(GameStatus::Started)
+{
+}
 
 bool GameController::Initialize()
 {
-	_app = new RenderWindow(VideoMode(744, 1080), "Game", Style::Close);
-	_app->setFramerateLimit(60);
+    InitWindowSize();
 
-	// create the board controller
-	m_BoardController = new BoardController();
+    g_appRenderWindow = std::make_unique<RenderWindow>(VideoMode(g_windowWidth, g_windowHeight), "Game", Style::Close);
+    g_appRenderWindow->setFramerateLimit(60);
 
-	return true;
+    // create the board controller
+    g_boardController = std::make_unique<BoardController>(g_windowWidth, g_windowHeight);
+
+    return true;
 }
 
-void GameController::CleanUp()
+void GameController::InitWindowSize()
 {
-	delete m_BoardController;
+    const auto &config = GameConfig::GetInstance();
+
+    g_windowWidth = config.GetCellSize() * (config.GetColSize() + 2);
+    g_windowHeight = config.GetCellSize() * (config.GetRowSize() + 4);
 }
 
 int GameController::Execute()
 {
-	// try to initialize the app
-	if (Initialize() != true)
-	{
-		return 0;
-	}
+    // try to initialize the app
+    if (!Initialize()) {
+        return 0;
+    }
 
-	while (_app->isOpen()) {
-		_app->clear(Color(50, 50, 50, 255));
-		_app->draw(*m_BoardController->GetDrawBoard());
+    Animation animation;
+    DrawSplashScreen win_screen(sf::Color(30, 170, 110), "You Won!!!");
+    DrawSplashScreen failed_screen(sf::Color(165, 39, 23), "Game Over");
 
-		m_BoardController->Update();
-		sf::Event event;
-		while (_app->pollEvent(event)) {
-			m_BoardController->GetDrawBoard()->OnMousePress(&event);
-			// "close requested" event: we close the window
-			if (event.type == sf::Event::Closed)
-				_app->close();
-		}
-		_app->display();
-	}
+    while (g_appRenderWindow->isOpen()) {
+        sf::Event event{};
+        g_appRenderWindow->clear(Color(50, 71, 76, 255));
 
-	CleanUp();
+        switch (g_gameStatus) {
+            case GameStatus::Started :
+                g_appRenderWindow->draw(*g_boardController->GetDrawBoard());
+                animation.SetDrawBoard(g_boardController->GetDrawBoard());
+                animation.update(0.3f);
+                g_boardController->Update();
+                while (g_appRenderWindow->pollEvent(event)) {
+                    g_boardController->GetDrawBoard()->OnMousePress(&event);
 
-	return 1;
+                    // "close requested" event: we close the window
+                    if (event.type == sf::Event::Closed)
+                        g_appRenderWindow->close();
+                }
+                if (g_boardController->GetWinStatus()) {
+                    g_boardController.reset();
+                    g_gameStatus = GameStatus::Won;
+                } else if (g_boardController->GetGameOverStatus()) {
+                    g_boardController.reset();
+                    g_gameStatus = GameStatus::Failed;
+                }
+                break;
+            case GameStatus::Won :
+                g_appRenderWindow->draw(win_screen);
+                while (g_appRenderWindow->pollEvent(event)) {
+                    if (win_screen.OnMousePress(&event)) {
+                        g_boardController = std::make_unique<BoardController>(g_windowWidth, g_windowHeight);
+                        g_gameStatus = GameStatus::Started;
+                    }
+
+                    // "close requested" event: we close the window
+                    if (event.type == sf::Event::Closed)
+                        g_appRenderWindow->close();
+                }
+                break;
+            case GameStatus::Failed :
+                g_appRenderWindow->draw(failed_screen);
+                while (g_appRenderWindow->pollEvent(event)) {
+                    if (failed_screen.OnMousePress(&event)) {
+                        g_boardController = std::make_unique<BoardController>(g_windowWidth, g_windowHeight);
+                        g_gameStatus = GameStatus::Started;
+                    }
+
+                    // "close requested" event: we close the window
+                    if (event.type == sf::Event::Closed)
+                        g_appRenderWindow->close();
+                }
+                break;
+        }
+
+        g_appRenderWindow->display();
+    }
+
+    return 1;
 }
-

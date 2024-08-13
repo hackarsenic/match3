@@ -1,12 +1,10 @@
-#include <iostream>
+#include <memory>
+#include "GameController.h"
 
-#include "GameController.hpp"
+int main()
+{
+    GameController gc;
+    gc.Execute();
 
-int main() {
-	GameController* gc = new GameController();
-    gc->Execute();
-
-	return 0;
-   
-
+    return 0;
 }

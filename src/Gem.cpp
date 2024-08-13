@@ -1,56 +1,58 @@
-#include "Gem.hpp"
-#include "SFML/Graphics.hpp"
+#include "Gem.h"
+#include "GameConfig.h"
 
-Gem::Gem(Color color) :
-	_Color(color),
-	_State(State::Normal)
+Gem::Gem(Color color) : g_color(color), g_state(State::Normal)
 {
-	// create sprites for all gem colors
-	sf::Sprite *red_sprite = new sf::Sprite(ResourceManager::GetTexture("C:/Users/User/Desktop/DevTestGame-master/resources/red.png"));
-	sf::Sprite *green_sprite = new sf::Sprite(ResourceManager::GetTexture("C:/Users/User/Desktop/DevTestGame-master/resources/green.png"));
-	sf::Sprite *blue_sprite = new sf::Sprite(ResourceManager::GetTexture("C:/Users/User/Desktop/DevTestGame-master/resources/blue.png"));
-	sf::Sprite *violet_sprite = new sf::Sprite(ResourceManager::GetTexture("C:/Users/User/Desktop/DevTestGame-master/resources/violet.png"));
-	sf::Sprite *orange_sprite = new sf::Sprite(ResourceManager::GetTexture("C:/Users/User/Desktop/DevTestGame-master/resources/orange.png"));
-	sf::Sprite *bomb_v_sprite = new sf::Sprite(ResourceManager::GetTexture("C:/Users/User/Desktop/DevTestGame-master/resources/v_bomb.png"));
-	sf::Sprite *bomb_h_sprite = new sf::Sprite(ResourceManager::GetTexture("C:/Users/User/Desktop/DevTestGame-master/resources/h_bomb.png"));
-	sf::Sprite *bomb_sprite = new sf::Sprite(ResourceManager::GetTexture("C:/Users/User/Desktop/DevTestGame-master/resources/bomb.png"));
-
-	// add sprites to the map
-	_ColorSpriteMap[Gem::Color::Red] = red_sprite;
-	_ColorSpriteMap[Gem::Color::Green] = green_sprite;
-	_ColorSpriteMap[Gem::Color::Blue] = blue_sprite;
-	_ColorSpriteMap[Gem::Color::Violet] = violet_sprite;
-	_ColorSpriteMap[Gem::Color::Orange] = orange_sprite;
-	_ColorSpriteMap[Gem::Color::Bomb_V] = bomb_v_sprite;
-	_ColorSpriteMap[Gem::Color::Bomb_H] = bomb_h_sprite;
-	_ColorSpriteMap[Gem::Color::Bomb] = bomb_sprite;
 }
 
-Gem::~Gem()
+Gem::Gem(const Gem &rhs)
 {
-	delete _ColorSpriteMap[Gem::Color::Red];
-	delete _ColorSpriteMap[Gem::Color::Green];
-	delete _ColorSpriteMap[Gem::Color::Blue];
-	delete _ColorSpriteMap[Gem::Color::Violet];
-	delete _ColorSpriteMap[Gem::Color::Orange];
-	delete _ColorSpriteMap[Gem::Color::Bomb_V];
-	delete _ColorSpriteMap[Gem::Color::Bomb_H];
-	delete _ColorSpriteMap[Gem::Color::Bomb];
+    g_color = rhs.g_color;
+    g_state = rhs.g_state;
 
-	_ColorSpriteMap.clear();
+    g_sprite = std::make_shared<sf::Sprite>(*rhs.g_sprite);
+}
+
+Gem::Gem(Gem &&rhs) noexcept
+{
+    g_color = rhs.g_color;
+    g_state = rhs.g_state;
+
+    g_sprite = std::move(rhs.g_sprite);
 }
 
 void Gem::ApplySprite()
 {
-	_Sprite = _ColorSpriteMap[_Color];
+    g_sprite = std::make_shared<sf::Sprite>(GetGemSpriteMap().at(g_color));
 }
 
-void Gem::SetState(State newState)
+void Gem::SetState(const State &newState)
 {
-	_State = newState;
+    g_state = newState;
 }
 
-Gem::State const& Gem::GetState()
+Gem::State const &Gem::GetState() const
 {
-	return _State;
+    return g_state;
+}
+
+const std::shared_ptr<sf::Sprite> &Gem::GetSprite() const
+{
+    return g_sprite;
+}
+
+const std::unordered_map<Gem::Color, sf::Sprite> &Gem::GetGemSpriteMap()
+{
+    const static std::unordered_map<Gem::Color, sf::Sprite> color_sprite_map = {
+        {Gem::Color::Red, sf::Sprite(ResourceManager::GetTexture((GameConfig::GetInstance().GetResourcePath() / "red.png").string()))},
+        {Gem::Color::Green, sf::Sprite(ResourceManager::GetTexture((GameConfig::GetInstance().GetResourcePath() / "green.png").string()))},
+        {Gem::Color::Blue, sf::Sprite(ResourceManager::GetTexture((GameConfig::GetInstance().GetResourcePath() / "blue.png").string()))},
+        {Gem::Color::Violet, sf::Sprite(ResourceManager::GetTexture((GameConfig::GetInstance().GetResourcePath() / "violet.png").string()))},
+        {Gem::Color::Orange, sf::Sprite(ResourceManager::GetTexture((GameConfig::GetInstance().GetResourcePath() / "orange.png").string()))},
+        {Gem::Color::Bomb_V, sf::Sprite(ResourceManager::GetTexture((GameConfig::GetInstance().GetResourcePath() / "v_bomb.png").string()))},
+        {Gem::Color::Bomb_H, sf::Sprite(ResourceManager::GetTexture((GameConfig::GetInstance().GetResourcePath() / "h_bomb.png").string()))},
+        {Gem::Color::Bomb, sf::Sprite(ResourceManager::GetTexture((GameConfig::GetInstance().GetResourcePath() / "bomb.png").string()))}
+    };
+
+    return color_sprite_map;
 }
